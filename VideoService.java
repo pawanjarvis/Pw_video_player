@@ -9,25 +9,32 @@ import androidx.core.app.NotificationCompat;
 
 public class VideoService extends Service {
 
-    private static final String CHANNEL_ID = "PW_VIDEO_CHANNEL";
-    private static final int NOTIFICATION_ID = 1;
+    private static final String CHANNEL_ID = "PWF_PHYSICS_CHANNEL";
+    private static final int NOTIFICATION_ID = 101;
     private PowerManager.WakeLock wakeLock;
 
     @Override
     public void onCreate() {
         super.onCreate();
-        startForeground(NOTIFICATION_ID, createNotification());
-        acquirePermanentWakeLock();
+        Toast.makeText(this, "PWF Background Service Started", Toast.LENGTH_LONG).show();
+        startForegroundService();
     }
 
-    private void acquirePermanentWakeLock() {
+    private void startForegroundService() {
+        createNotificationChannel();
+        Notification notification = createNotification();
+        startForeground(NOTIFICATION_ID, notification);
+        acquireWakeLock();
+    }
+
+    private void acquireWakeLock() {
         try {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
             if (powerManager != null) {
                 wakeLock = powerManager.newWakeLock(
                     PowerManager.PARTIAL_WAKE_LOCK |
                     PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                    "PWVideo:BackgroundService"
+                    "PWFPhysics:WakeLock"
                 );
                 wakeLock.acquire();
             }
@@ -37,16 +44,13 @@ public class VideoService extends Service {
     }
 
     private Notification createNotification() {
-        createNotificationChannel();
-        
         return new NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("PWF Physics - Course Running")
-            .setContentText("Video playing in background")
+            .setContentTitle("PWF Physics - Running")
+            .setContentText("Physics video course in progress")
             .setSmallIcon(android.R.drawable.ic_media_play)
-            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
-            .setShowWhen(false)
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .build();
     }
@@ -56,9 +60,9 @@ public class VideoService extends Service {
             NotificationChannel channel = new NotificationChannel(
                 CHANNEL_ID,
                 "PWF Physics Course",
-                NotificationManager.IMPORTANCE_LOW
+                NotificationManager.IMPORTANCE_HIGH
             );
-            channel.setDescription("Physics course video is playing continuously");
+            channel.setDescription("Physics course video is playing");
             channel.setShowBadge(false);
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             
@@ -71,7 +75,7 @@ public class VideoService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        // Service को हमेशा restart होने दें
+        // Service को automatically restart होने दें
         return START_STICKY;
     }
 
@@ -86,5 +90,6 @@ public class VideoService extends Service {
         if (wakeLock != null && wakeLock.isHeld()) {
             wakeLock.release();
         }
+        Toast.makeText(this, "PWF Service Stopped", Toast.LENGTH_SHORT).show();
     }
 }
