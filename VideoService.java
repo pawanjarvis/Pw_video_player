@@ -1,4 +1,4 @@
-package com.example.pwvideoplayer;
+package com.pwf.physics;
 
 import android.app.*;
 import android.content.Intent;
@@ -23,12 +23,14 @@ public class VideoService extends Service {
     private void acquirePermanentWakeLock() {
         try {
             PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            wakeLock = powerManager.newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK |
-                PowerManager.ACQUIRE_CAUSES_WAKEUP,
-                "PWVideo:BackgroundService"
-            );
-            wakeLock.acquire();
+            if (powerManager != null) {
+                wakeLock = powerManager.newWakeLock(
+                    PowerManager.PARTIAL_WAKE_LOCK |
+                    PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                    "PWVideo:BackgroundService"
+                );
+                wakeLock.acquire();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -37,7 +39,6 @@ public class VideoService extends Service {
     private Notification createNotification() {
         createNotificationChannel();
         
-        // PWF Physics के लिए professional notification
         return new NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle("PWF Physics - Course Running")
             .setContentText("Video playing in background")
@@ -62,7 +63,9 @@ public class VideoService extends Service {
             channel.setLockscreenVisibility(Notification.VISIBILITY_PUBLIC);
             
             NotificationManager manager = getSystemService(NotificationManager.class);
-            manager.createNotificationChannel(channel);
+            if (manager != null) {
+                manager.createNotificationChannel(channel);
+            }
         }
     }
 

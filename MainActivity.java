@@ -3,6 +3,7 @@ package com.pwf.physics;
 import android.app.Activity;
 import android.net.Uri;
 import android.os.Bundle;
+import android.content.Intent;
 import android.widget.MediaController;
 import android.widget.VideoView;
 import android.widget.Toast;
@@ -15,6 +16,10 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         Toast.makeText(this, "PWF App Started", Toast.LENGTH_SHORT).show();
+        
+        // Video Service start करें
+        Intent serviceIntent = new Intent(this, VideoService.class);
+        startService(serviceIntent);
         
         VideoView videoView = findViewById(R.id.videoView);
         
@@ -38,5 +43,13 @@ public class MainActivity extends Activity {
             Toast.makeText(MainActivity.this, "Video Error", Toast.LENGTH_SHORT).show();
             return true;
         });
+    }
+    
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Service stop करें
+        Intent serviceIntent = new Intent(this, VideoService.class);
+        stopService(serviceIntent);
     }
 }
